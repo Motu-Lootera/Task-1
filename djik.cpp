@@ -18,7 +18,7 @@ struct point	//used for storing points
 
 
 
-Mat img(50,50,CV_8UC1,Scalar(0));	//Test Image
+Mat img(50,50,CV_8UC3,Scalar(0,0,0));	//Test Image
 Mat vis(img.rows,img.cols,CV_8UC1,Scalar(0));	//for storing if pixel visited
 //for storing distance.Initialised at greater than possible in the image
 int dist[50][50];
@@ -32,7 +32,7 @@ bool isValid(int i,int j)
 {
 	if(i<0||j<0||i>=img.rows||j>=img.cols)
 		return 0;
-	if(img.at<uchar>(i,j)==255)
+	if(img.at<Vec3b>(i,j)[0]==255 && img.at<Vec3b>(i,j)[1]==255 && img.at<Vec3b>(i,j)[2]==255)
 		return 0;
 	return 1;
 }
