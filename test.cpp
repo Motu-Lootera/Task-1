@@ -48,7 +48,7 @@ void binary()
 	}
 }
 
-float dist(point a,point b)
+float gn(point a,point b)
 {
 	int dx=abs(a.x-b.x);
 	int dy=abs(a.y-b.y);
@@ -56,7 +56,15 @@ float dist(point a,point b)
 	return d;
 }
 
-void heur(point src,point p,point dest,float th)
+float hn(point a,point b)
+{
+	int dx=abs(a.x-b.x);
+	int dy=abs(a.y-b.y);
+	float d= (dx+dy) + ((-.586)*(dx<dy ? dx:dy));
+	return d;
+}
+
+void A_Star(point src,point p,point dest)
 {
 	vis.at<uchar>(p.x,p.y)=255;
 	namedWindow("Image",WINDOW_NORMAL);
@@ -72,7 +80,7 @@ void heur(point src,point p,point dest,float th)
 			if (isValid(p.x+a,p.y+b) && vis.at<uchar>(p.x+a,p.y+b)==0)
 			{
 				tmp={p.x+a,p.y+b};
-				float fn= dist(src,tmp) + th*dist(tmp,dest);
+				float fn= gn(src,tmp) + hn(tmp,dest);
 				if (fn<min)
 				{
 					min=fn;
@@ -121,15 +129,15 @@ void path(vector <point> sp)
 	int i=0;
 	point u=sp[i];
 	img1.at<Vec3b>(u.x,u.y)[1]=255;
-	for(int i=1; i<sp.size(); ++)
+	for(int i=1; i<sp.size(); ++i)
 	{
 		u=sp[i];
 		cout << u.x << " " << u.y << endl;
-		int dx=abs(u.x-sp[i-1].x), dy=abs(u.y,sp[i-1].y)
+		int dx=abs(u.x-sp[i-1].x), dy=abs(u.y-sp[i-1].y);
 		if (dx*dy==0)
-			dist++;
+			de+=1;
 		else
-			dist=dist +1.414;
+			de+=1.414;
 		imshow("Path",img1);
 		img1.at<Vec3b>(u.x,u.y)[1]=255;
 		waitKey(1);
@@ -137,16 +145,16 @@ void path(vector <point> sp)
 	// img1.at<Vec3b>(dest.x,dest.y)[1]=255;
 	imshow("Path",img1);
 
-	printf("Distance b/w src & dest(TH)= %f\n", dist(*sp.begin(),*(sp.end()-1)));
-	printf()
+	printf("Distance b/w src & dest(TH)= %.3f\n", gn(*sp.begin(),*(sp.end()-1)));
+	printf("Distance b/w src & dest(EXP)= %.3f\n", de);
 	waitKey(0);
 }
 
 int main()
 {	
 	binary();	
-	float th;
-	printf("Enter Th: "); scanf("%f",&th);
+	// float th;
+	// printf("Enter Th: "); scanf("%f",&th);
 	point src, dest;	
 	src= centre(1);
 	
@@ -166,12 +174,11 @@ int main()
 	
 	while(!qu.empty() && vis.at<uchar>(dest.x,dest.y)==0)
 	{
-		// cout<<"a\n";
-		curr=qu.front();
+		// cout<<"a\ngn	curr=qu.front();
 		qu.pop();
 		// djik(curr.x,curr.y);
 		// cout<<"b\n";
-		heur(src,curr,dest,th);
+		A_Star(src,curr,dest);
 	}
 	
 	path(sp);

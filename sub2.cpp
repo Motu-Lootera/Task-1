@@ -45,6 +45,14 @@ bool isValid(int i,int j)
 		return 0;
 	if(img.at<Vec3b>(i,j)[0]==255 && img.at<Vec3b>(i,j)[1]==255 && img.at<Vec3b>(i,j)[2]==255)
 		return 0;
+	for (int a = -4; a <=6; ++a)
+	{
+		for (int b = -9; b <=10; ++b)
+		{
+			if(img.at<Vec3b>(i+a,j+b)[0]==255 && img.at<Vec3b>(i+a,j+b)[1]==255 && img.at<Vec3b>(i+a,j+b)[2]==255)
+				return 0;
+		}
+	}
 	return 1;
 }
 
@@ -60,6 +68,7 @@ void add_qu(point p)
 			if (isValid(p.x+a,p.y+b) && vis.at<uchar>(p.x+a,p.y+b)==0)
 			{
 				point tmp={p.x+a,p.y+b};
+				cout << "add " << tmp.x << " " << tmp.y << endl;
 				qu.push(tmp);
 				vis.at<uchar>(p.x+a,p.y+b)=255;
 			}
@@ -71,10 +80,16 @@ void add_qu(point p)
 
 void djik(int i,int j)
 {
+	static int ctr=0;
+	ctr++;
+	if (ctr%35==0)
+	{
+		namedWindow("Image",WINDOW_NORMAL);
+		imshow("Image",vis);
+		waitKey(1);
+	}
 	vis.at<uchar>(i,j)=255;
-	/*namedWindow("Image",WINDOW_NORMAL);
-	imshow("Image",vis);
-	waitKey(1);*/
+	cout << "djik " << i << " " << j << endl;
 	
 	//Main Code
 	if (isValid(i+(-1),j-1) && ((dist[i][j]+1.414) < dist[i+(-1)][j-1]) )
@@ -197,8 +212,7 @@ void path(int x,int y)
 	}
 	img1.at<Vec3b>(x,y)[1]=255;
 			imshow("Path",img1);
-
-	printf("Distance b/w src & dest= %f\n",dist[x][y]);
+	printf("Distance b/w src & dest(EXP)= %f\n",dist[x][y]);
 	waitKey(0);
 }
 
