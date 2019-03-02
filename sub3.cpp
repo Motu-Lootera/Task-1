@@ -81,7 +81,7 @@ void djik(int i,int j)
 {
 	static int ctr=0;
 	ctr++;
-	if (ctr%45==0)
+	if (ctr%35==0)
 	{
 		namedWindow("Image",WINDOW_NORMAL);
 		imshow("Image",vis);
@@ -91,33 +91,78 @@ void djik(int i,int j)
 	cout << "djik " << i << " " << j << endl;
 	
 	//Main Code
-	for (int a = -1; a < 2; ++a)
-	{
-		for (int b = -1; b < 2; ++b)
-		{
-			if(isValid(i+a,j+b))
-			{
-				if((abs(a+b)==1) && (dist[i][j] + 1< dist[i+a][j+b]))
+	if (isValid(i+(-1),j-1) && ((dist[i][j]+1.414) < dist[i+(-1)][j-1]) )
 				{
-					dist[i+a][j+b]=dist[i][j] + 1;	//distance is updated
-					sp[i+a][j+b]={};	//vector is cleared out
-					//shortest path for (i,j) appended to sp for (i+a,j)
-					sp[i+a][j+b].insert(sp[i+a][j+b].begin(),sp[i][j].begin(),sp[i][j].end());
-					//finally (i+a,j) appended to the vector
-					sp[i+a][j+b].push_back({i+a,j+b});
-				}
-				else if (abs(a*b)==1 && (dist[i][j] + 1.414< dist[i+a][j+b]))
+					dist[i+(-1)][j-1]=dist[i][j] + 1.414;	//dist(-1)nce is upd(-1)ted
+					sp[i+(-1)][j-1]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+(-1),j)
+					sp[i+(-1)][j-1].insert(sp[i+(-1)][j-1].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i+(-1),j) (-1)ppended to the vector
+					sp[i+(-1)][j-1].push_back({i+(-1),j-1});
+				}	  
+	if (isValid(i+(-1),j) && ((dist[i][j]+1) < dist[i+(-1)][j]) )
 				{
-					dist[i+a][j+b]=dist[i][j] + 1.414;	//distance is updated
-					sp[i+a][j+b]={};	//vector is cleared out
-					//shortest path for (i,j) appended to sp for (i+a,j)
-					sp[i+a][j+b].insert(sp[i+a][j+b].begin(),sp[i][j].begin(),sp[i][j].end());
-					//finally (i+a,j) appended to the vector
-					sp[i+a][j+b].push_back({i+a,j+b});
+					dist[i+(-1)][j]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
+					sp[i+(-1)][j]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+(-1),j)
+					sp[i+(-1)][j].insert(sp[i+(-1)][j].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i+(-1),j) (-1)ppended to the vector
+					sp[i+(-1)][j].push_back({i+(-1),j});
 				}
-			}
-		}
-	}
+	if (isValid(i+(-1),j+1) && ((dist[i][j]+1.414) < dist[i+(-1)][j+1]) )
+				{
+					dist[i+(-1)][j+1]=dist[i][j] + 1.414;	//dist(-1)nce is upd(-1)ted
+					sp[i+(-1)][j+1]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+(-1),j)
+					sp[i+(-1)][j+1].insert(sp[i+(-1)][j+1].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i+(-1),j) (-1)ppended to the vector
+					sp[i+(-1)][j+1].push_back({i+(-1),j+1});
+				}	
+	if (isValid(i,j-1) && ((dist[i][j]+1) < dist[i][j-1]) )
+				{
+					dist[i][j-1]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
+					sp[i][j-1]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j-1) (-1)ppended to sp for (i,j-1)
+					sp[i][j-1].insert(sp[i][j-1].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i,j-1) (-1)ppended to the vector
+					sp[i][j-1].push_back({i,j-1});
+				}
+	if (isValid(i,j+1) && ((dist[i][j]+1) < dist[i][j+1]) )
+				{
+					dist[i][j+1]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
+					sp[i][j+1]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j-1) (-1)ppended to sp for (i,j-1)
+					sp[i][j+1].insert(sp[i][j+1].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i,j-1) (-1)ppended to the vector
+					sp[i][j+1].push_back({i,j+1});
+				}
+	if (isValid(i+1,j-1) && ((dist[i][j]+1.414) < dist[i+1][j-1]) )
+				{
+					dist[i+1][j-1]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
+					sp[i+1][j-1]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+1,j)
+					sp[i+1][j-1].insert(sp[i+1][j-1].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i+1,j) (-1)ppended to the vector
+					sp[i+1][j-1].push_back({i+1,j-1});
+				}			
+	if (isValid(i+1,j) && ((dist[i][j]+1) < dist[i+1][j]) )
+				{
+					dist[i+1][j]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
+					sp[i+1][j]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+1,j)
+					sp[i+1][j].insert(sp[i+1][j].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i+1,j) (-1)ppended to the vector
+					sp[i+1][j].push_back({i+1,j});
+				}
+	if (isValid(i+1,j+1) && ((dist[i][j]+1.414) < dist[i+1][j+1]) )
+				{
+					dist[i+1][j+1]=dist[i][j] + 1.414;	//dist(-1)nce is upd(-1)ted
+					sp[i+1][j+1]={};	//vector is cle(-1)red out
+					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+1,j)
+					sp[i+1][j+1].insert(sp[i+1][j+1].begin(),sp[i][j].begin(),sp[i][j].end());
+					//fin(-1)lly (i+1,j) (-1)ppended to the vector
+					sp[i+1][j+1].push_back({i+1,j+1});
+				}					
 }
 
 
@@ -173,7 +218,6 @@ void path(int x,int y)
 int main()
 {	
 	point src, dest;
-	binary();
 	src= centre(1);
 	
 	for (int i = 0; i < img.rows; ++i)

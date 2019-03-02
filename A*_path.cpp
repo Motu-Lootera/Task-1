@@ -72,7 +72,7 @@ void heur(point src,point p,point dest)
 			if (isValid(p.x+a,p.y+b) && vis.at<uchar>(p.x+a,p.y+b)==0)
 			{
 				tmp={p.x+a,p.y+b};
-				float fn= dist(src,tmp) + 50*dist(tmp,dest);
+				float fn= dist(src,tmp) + dist(tmp,dest);
 				if (fn<min)
 				{
 					min=fn;
