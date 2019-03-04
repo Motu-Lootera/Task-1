@@ -1,4 +1,3 @@
-
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -11,15 +10,14 @@ struct point	//used for storing points
 {
 	int x;
 	int y;
-	float ang;
+	int ang;
+	/*bool operator<(const point& rhs) const
+    {
+        return d > rhs.d;
+    }*/
 };
 
-/*struct pairs
-{
-	point p;
-	point par;
-	float fn;
-};*/
+
 
 Mat img = imread("Test1.png", 1);	//Test Image
 Mat vis(img.rows,img.cols,CV_8UC1,Scalar(0));	//for storing if pixel visited
@@ -32,7 +30,7 @@ vector<point> sp;
 
 
 
-int isValid(point p)	
+bool isValid(point p)	
 {
 	point a={p.x-4,p.y-9};
 	for (int ang = 0; ang >-91; ang-=10)
@@ -44,7 +42,6 @@ int isValid(point p)
 			{
 				int nx=(j-10)*sin((p.ang+ang)*PI/180)+(i-5)*cos((p.ang+ang)*PI/180) +15;
 				int ny=(j-10)*cos((p.ang+ang)*PI/180)-(i-5)*sin((p.ang+ang)*PI/180) +30;
-				
 				if(a.x+nx<0||p.y+ny<0||a.x+nx>=img.rows||p.y+ny>=img.cols)
 				{	
 					flag=1;
@@ -85,11 +82,7 @@ int isValid(point p)
 				break;		
 		}
 		if(flag==0)
-		{
-			cout << "Point: " << p.x << "," <<p.y << endl;
-			cout << "Angle: "<< p.ang+ang << endl;
 			return (p.ang+ang);
-		}
 		
 
 	}
@@ -164,7 +157,7 @@ float dist(point a,point b)
 	return d;
 }
 
-void heur(point src,point p,point dest)
+void a_star(point src,point p,point dest)
 {
 	vis.at<uchar>(p.x,p.y)=255;
 	namedWindow("Image",WINDOW_NORMAL);
@@ -177,15 +170,16 @@ void heur(point src,point p,point dest)
 		for (int b = -1; b < 2; b++)
 		{
 			// for only selectig the adjacent 4 valid pixels
-			int c=isValid({p.x+a,p.y+b,0});
-			if ((c!=-1) && vis.at<uchar>(p.x+a,p.y+b)==0)
+			int c=isValid({p.x+a,p.y+b});
+			if (c!=-1 && vis.at<uchar>(p.x+a,p.y+b)==0)
 			{
-				tmp={p.x+a,p.y+b,p.ang};
-				float fn= dist(src,tmp) + 50*dist(tmp,dest);
+				tmp={p.x+a,p.y+b,c};
+				float fn= dist(src,tmp) + 10*dist(tmp,dest);
 				if (fn<min)
 				{
 					min=fn;
 					push=tmp;
+					
 				}			
 			}
 		}
@@ -218,7 +212,7 @@ point centre(int chnl)
 			}
 		}
 	}	
-	point centre = {sumx/ctr, sumy/ctr,0};
+	point centre = {sumx/ctr, sumy/ctr, 0};
 	return centre;
 }
 
@@ -258,29 +252,20 @@ int main()
 	// printf("Enter Th: "); scanf("%f",&th);
 	point src, dest;	
 	src= centre(1);
-	
-	/*for (int i = 0; i < img.rows; ++i)
-	{
-			for (int j = 0; j < img.cols; ++j)
-			{
-				dist[i][j]=(img.rows*img.cols)+200;
-			}
-	}
-	dist[src.x][src.y]=0;*/	// initial distance of src set to 0
-	// sp[src.x][src.y].push_back({src.x,src.y});	//shortest path for src plugged
-	point curr={src.x,src.y};
+
+	sp.push_back({src.x,src.y,0});	//shortest path for src plugged
+	point curr={src.x,src.y,0};
 	qu.push(curr);
 	
 	dest = centre(2);
 	
 	while(!qu.empty() && vis.at<uchar>(dest.x,dest.y)==0)
 	{
-		// cout<<"a\n";
-		curr=qu.front();
+		a_star(src,qu.front(),dest);
 		qu.pop();
+		// cout<<"a\n";
 		// djik(curr.x,curr.y);
 		// cout<<"b\n";
-		heur(src,curr,dest);
 	}
 	
 	path(sp);
