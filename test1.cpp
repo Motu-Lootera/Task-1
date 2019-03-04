@@ -10,17 +10,23 @@ struct point	//used for storing points
 {
 	int x;
 	int y;
+	float d;
+	bool operator<(const point& rhs) const
+    {
+        return d > rhs.d;
+    }
 };
 
 
 
-Mat img(50,50,CV_8UC3,Scalar(0,0,0));	//Test Image
+Mat img = imread("Test1.png", 1);	//Test Image
 Mat vis(img.rows,img.cols,CV_8UC1,Scalar(0));	//for storing if pixel visited
 //for storing distance.Initialised at greater than possible in the image
-float dist[50][50];
-queue<point> qu;	//queue for implementing bfs
+// float dist[1080][1080];
+priority_queue<point> qu;	//queue for implementing bfs
 // 2-d array of vectors storing points for shortest path
-vector<point> sp[50][50]; 
+// vector<point> sp[1080][1080]; 
+vector<point> sp;
 
 
 
@@ -33,10 +39,44 @@ bool isValid(int i,int j)
 	return 1;
 }
 
-
-
-void add_qu(point p)
+void binary()
 {
+	for (int i = 0; i < img.rows; ++i)
+	{
+		for (int j = 0; j < img.cols; ++j)
+		{
+			if(img.at<Vec3b>(i,j)[0]>100 && img.at<Vec3b>(i,j)[1]>100 && img.at<Vec3b>(i,j)[2]>100)
+				img.at<Vec3b>(i,j)={255,255,255};
+			if(img.at<Vec3b>(i,j)[0]<100 && img.at<Vec3b>(i,j)[1]<100 && img.at<Vec3b>(i,j)[2]<100)
+				img.at<Vec3b>(i,j)={0,0,0};
+		}
+	}
+}
+
+float gn(point a,point b)
+{
+	int dx=abs(a.x-b.x);
+	int dy=abs(a.y-b.y);
+	float d= sqrt(dx*dx + dy*dy);
+	return d;
+}
+
+float hn(point a,point b) //considereing diagonal distances
+{
+	int dx=abs(a.x-b.x);
+	int dy=abs(a.y-b.y);
+	float d= (dx+dy)- (0.586*(dx<dy ? dx:dy));
+	return d;
+}
+
+void a_star(point src,point p,point dest)
+{
+	vis.at<uchar>(p.x,p.y)=255;
+	namedWindow("Image",WINDOW_NORMAL);
+	imshow("Image",vis);
+	waitKey(1);
+	float min= 100000;
+	point tmp,push;
 	for (int a = -1; a < 2; a++)
 	{
 		for (int b = -1; b < 2; b++)
@@ -44,153 +84,100 @@ void add_qu(point p)
 			// for only selectig the adjacent 4 valid pixels
 			if (isValid(p.x+a,p.y+b) && vis.at<uchar>(p.x+a,p.y+b)==0)
 			{
-				point tmp={p.x+a,p.y+b};
-				qu.push(tmp);
-				// vis.at<uchar>(p.x+a,p.y+b)=255;
+				tmp={p.x+a,p.y+b,gn(src,tmp)};
+				float fn= gn(src,tmp) + hn(tmp,dest);
+				if (fn<min)
+				{
+					min=fn;
+					push=tmp;
+				}			
+			}
+		}
+	} 
+	qu.push(push);
+	sp.push_back(push);
+	// qu.push(tmp);
+}
+
+
+point centre(int chnl)
+{
+	Mat img2=img.clone();
+	int sumx=0, sumy=0, ctr=0;
+	for(int i=0; i<img.rows; i++){
+		for(int j=0; j<img.cols; j++){
+			if(img.at<Vec3b>(i,j)[0]>=220 && img.at<Vec3b>(i,j)[1]>=220 && img.at<Vec3b>(i,j)[2]>=220){
+				img2.at<Vec3b>(i,j)[0]=0;
+				img2.at<Vec3b>(i,j)[1]=0;
+				img2.at<Vec3b>(i,j)[2]=0;
 			}
 		}
 	}
+	for(int i=0; i<img.rows; i++){
+		for(int j=0; j<img.cols; j++){
+			if(img2.at<Vec3b>(i,j)[chnl] >= 230){
+				sumx += i;
+				sumy += j;
+				ctr++;
+			}
+		}
+	}	
+	point centre = {sumx/ctr, sumy/ctr, (float)(img.rows*img.cols+200)};
+	return centre;
 }
 
-
-
-void djik(int i,int j)
-{
-	vis.at<uchar>(i,j)=255;
-	namedWindow("Image",WINDOW_NORMAL);
-	imshow("Image",vis);
-	waitKey(1);
-	
-	//Main Code
-	if (isValid(i+(-1),j-1) && ((dist[i][j]+1.414) < dist[i+(-1)][j-1]) )
-				{
-					dist[i+(-1)][j-1]=dist[i][j] + 1.414;	//dist(-1)nce is upd(-1)ted
-					sp[i+(-1)][j-1]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+(-1),j)
-					sp[i+(-1)][j-1].insert(sp[i+(-1)][j-1].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i+(-1),j) (-1)ppended to the vector
-					sp[i+(-1)][j-1].push_back({i+(-1),j-1});
-				}	  
-	if (isValid(i+(-1),j) && ((dist[i][j]+1) < dist[i+(-1)][j]) )
-				{
-					dist[i+(-1)][j]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
-					sp[i+(-1)][j]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+(-1),j)
-					sp[i+(-1)][j].insert(sp[i+(-1)][j].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i+(-1),j) (-1)ppended to the vector
-					sp[i+(-1)][j].push_back({i+(-1),j});
-				}
-	if (isValid(i+(-1),j+1) && ((dist[i][j]+1.414) < dist[i+(-1)][j+1]) )
-				{
-					dist[i+(-1)][j+1]=dist[i][j] + 1.414;	//dist(-1)nce is upd(-1)ted
-					sp[i+(-1)][j+1]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+(-1),j)
-					sp[i+(-1)][j+1].insert(sp[i+(-1)][j+1].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i+(-1),j) (-1)ppended to the vector
-					sp[i+(-1)][j+1].push_back({i+(-1),j+1});
-				}	
-	if (isValid(i,j-1) && ((dist[i][j]+1) < dist[i][j-1]) )
-				{
-					dist[i][j-1]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
-					sp[i][j-1]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j-1) (-1)ppended to sp for (i,j-1)
-					sp[i][j-1].insert(sp[i][j-1].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i,j-1) (-1)ppended to the vector
-					sp[i][j-1].push_back({i,j-1});
-				}
-	if (isValid(i,j+1) && ((dist[i][j]+1) < dist[i][j+1]) )
-				{
-					dist[i][j+1]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
-					sp[i][j+1]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j-1) (-1)ppended to sp for (i,j-1)
-					sp[i][j+1].insert(sp[i][j+1].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i,j-1) (-1)ppended to the vector
-					sp[i][j+1].push_back({i,j+1});
-				}
-	if (isValid(i+1,j-1) && ((dist[i][j]+1.414) < dist[i+1][j-1]) )
-				{
-					dist[i+1][j-1]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
-					sp[i+1][j-1]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+1,j)
-					sp[i+1][j-1].insert(sp[i+1][j-1].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i+1,j) (-1)ppended to the vector
-					sp[i+1][j-1].push_back({i+1,j-1});
-				}			
-	if (isValid(i+1,j) && ((dist[i][j]+1) < dist[i+1][j]) )
-				{
-					dist[i+1][j]=dist[i][j] + 1;	//dist(-1)nce is upd(-1)ted
-					sp[i+1][j]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+1,j)
-					sp[i+1][j].insert(sp[i+1][j].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i+1,j) (-1)ppended to the vector
-					sp[i+1][j].push_back({i+1,j});
-				}
-	if (isValid(i+1,j+1) && ((dist[i][j]+1.414) < dist[i+1][j+1]) )
-				{
-					dist[i+1][j+1]=dist[i][j] + 1.414;	//dist(-1)nce is upd(-1)ted
-					sp[i+1][j+1]={};	//vector is cle(-1)red out
-					//shortest p(-1)th for (i,j) (-1)ppended to sp for (i+1,j)
-					sp[i+1][j+1].insert(sp[i+1][j+1].begin(),sp[i][j].begin(),sp[i][j].end());
-					//fin(-1)lly (i+1,j) (-1)ppended to the vector
-					sp[i+1][j+1].push_back({i+1,j+1});
-				}					
-}
-
-
-
-void path(int x,int y)
+void path(vector <point> sp)
 {
 	Mat img1=img.clone();
 	namedWindow("Path",WINDOW_NORMAL);
-	point a;
+	float de;
 	int i=0;
-	// a=sp[x][y][i];
-	// cout << sp[x][y].size() << endl;
-	while(a.x!=x || a.y!=y)
+	point u=sp[i];
+	img1.at<Vec3b>(u.x,u.y)[1]=255;
+	for(int i=1; i<sp.size(); ++i)
 	{
-		a=sp[x][y][i];
-		cout << a.x << " " << a.y << endl;
+		u=sp[i];
+		cout << u.x << " " << u.y << endl;
+		int dx=abs(u.x-sp[i-1].x), dy=abs(u.y-sp[i-1].y);
+		if (dx*dy==0)
+			de+=1;
+		else
+			de+=1.414;
 		imshow("Path",img1);
-		img1.at<Vec3b>(a.x,a.y)[1]=255;
-		i++;
-		waitKey(1);		
+		img1.at<Vec3b>(u.x,u.y)[1]=255;
+		waitKey(1);
 	}
-	img1.at<Vec3b>(x,y)[1]=255;
-			imshow("Path",img1);
+	// img1.at<Vec3b>(dest.x,dest.y)[1]=255;
+	imshow("Path",img1);
 
-	printf("Distance b/w src & dest= %f\n",dist[x][y]);
+	printf("Distance b/w src & dest(TH)= %.3f\n", gn(*sp.begin(),*(sp.end()-1)));
+	printf("Distance b/w src & dest(EXP)= %.3f\n", de);
 	waitKey(0);
 }
 
 int main()
 {	
-	int x,y;
-	//taking co-ords for src pt.
-	printf("Enter src_x: "); scanf("%d",&x);
-	printf("Enter src_y: "); scanf("%d",&y);
-	
-	for (int i = 0; i < img.rows; ++i)
-	{
-			for (int j = 0; j < img.cols; ++j)
-			{
-				dist[i][j]=(img.rows*img.cols)+200;
-			}
-	}
-	dist[x][y]=0;	// initial distance of src set to 0
-	sp[x][y].push_back({x,y});	//shortest path for src plugged
-	point curr={x,y};
+	binary();	
+	// float th;
+	// printf("Enter Th: "); scanf("%f",&th);
+	point src, dest;	
+	src= centre(1);
+
+	sp.push_back({src.x,src.y,0});	//shortest path for src plugged
+	point curr={src.x,src.y,0};
 	qu.push(curr);
-	while(!qu.empty())
+	
+	dest = centre(2);
+	
+	while(!qu.empty() && vis.at<uchar>(dest.x,dest.y)==0)
 	{
-		curr=qu.front();
+		a_star(src,qu.top(),dest);
 		qu.pop();
-		add_qu(curr);
-		djik(curr.x,curr.y);
+		// cout<<"a\n";
+		// djik(curr.x,curr.y);
+		// cout<<"b\n";
 	}
 	
-	//Taking co-ords for destination pt.
-	printf("Enter dest_x: "); scanf("%d",&x);
-	printf("Enter dest_y: "); scanf("%d",&y);
-	path(x,y);
+	path(sp);
 	return 0;
 }

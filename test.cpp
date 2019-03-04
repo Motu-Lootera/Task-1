@@ -184,9 +184,8 @@ int main()
 	
 	dest = centre(2);
 	
-	while(!qu.empty())
+	while(!qu.empty() && vis.at<uchar>(dest.x,dest.y)==0)
 	{
-		priority_queue<point> it= qu;
 		djik(qu.top().x,qu.top().y);	
 		qu.pop();
 		// add_qu(curr);

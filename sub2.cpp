@@ -44,9 +44,9 @@ bool isValid(int i,int j)
 		return 0;
 	if(img.at<Vec3b>(i,j)[0]==255 && img.at<Vec3b>(i,j)[1]==255 && img.at<Vec3b>(i,j)[2]==255)
 		return 0;
-	for (int a = -4; a <=6; ++a)
+	for (int a = -4; a <16; ++a)
 	{
-		for (int b = -9; b <=10; ++b)
+		for (int b = -9; b <10; ++b)
 		{
 			if(img.at<Vec3b>(i+a,j+b)[0]==255 && img.at<Vec3b>(i+a,j+b)[1]==255 && img.at<Vec3b>(i+a,j+b)[2]==255)
 				return 0;
